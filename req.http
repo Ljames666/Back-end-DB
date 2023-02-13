@@ -1,0 +1,77 @@
+GET http://localhost:8081/client HTTP/1.1
+
+###
+
+POST http://localhost:8081/client HTTP/1.1
+content-type: application/json
+
+{
+	"username":"MM",
+	"password":"S28sdskd9@!"
+}
+
+###
+
+GET http://localhost:8081/account HTTP/1.1
+
+###
+
+GET http://localhost:8081/account/b25d201f-5fc3-4eb0-b373-1975c978f999 HTTP/1.1
+
+###
+
+POST http://localhost:8081/account HTTP/1.1
+content-type: application/json
+
+{
+    "number_account": 2,
+    "client_id": "f7d24a1c-3a3b-4aae-97a6-b33dedbefec5"
+}
+
+###
+
+PUT http://localhost:8081/account HTTP/1.1
+content-type: application/json
+
+{
+    "balance": 10,
+    "uid": "9672f04a-a23a-4b02-a486-35dceff8f7d1"
+}
+
+###
+
+DELETE http://localhost:8081/account/9672f04a-a23a-4b02-a486-35dceff8f7d1 HTTP/1.1
+
+###
+
+GET http://localhost:8081/transactions HTTP/1.1
+
+###
+
+GET http://localhost:8081/transactions/5aad4b67-9d37-4444-a48a-d9881150c48b HTTP/1.1
+
+###
+
+POST http://localhost:8081/transactions HTTP/1.1
+content-type: application/json
+
+{
+    "trans_value": 50,
+    "trans_type": "outcome",
+    "account_id": "b25d201f-5fc3-4eb0-b373-1975c978f999"
+}
+
+###
+
+PUT http://localhost:8081/transactions HTTP/1.1
+content-type: application/json
+
+{
+    "trans_value": 10,
+    "trans_type": "income",
+    "uid": "5aad4b67-9d37-4444-a48a-d9881150c48b"
+}
+
+###
+
+DELETE http://localhost:8081/transactions/5aad4b67-9d37-4444-a48a-d9881150c48b HTTP/1.1
