@@ -6,8 +6,8 @@ POST http://localhost:8081/client HTTP/1.1
 content-type: application/json
 
 {
-	"username":"MM",
-	"password":"S28sdskd9@!"
+	"username":"2M",
+	"password":"S28sdskd9rd!"
 }
 
 ###

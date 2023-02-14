@@ -2,141 +2,144 @@ import { Express, Request, Response } from 'express';
 import { Client } from './repositories/client.repository';
 import Account from './repositories/account.repository';
 import Transaction from './repositories/transaction.repository';
+import ITransaction from './interfaces/transaction.interface';
 
 export default (app: Express) => {
-	app.get('/', (req: Request, res: Response) =>
-		res.send('<h1>Transactions Api</h1>')
-	);
+    app.get('/', (req: Request, res: Response) => res.send('<h1>Transactions Api</h1>'));
 
-	const clienBank = new Client();
+    const clienBank = new Client();
 
-	app.get('/client', async (req: Request, res: Response) => {
-		const result = await clienBank.getAllClients();
-		res.status(200).send(result);
-	});
+    app.get('/client', async (req: Request, res: Response) => {
+        const result = await clienBank.getAllClients();
+        res.status(200).send(result);
+    });
 
-	app.post('/client', (req: Request, res: Response) => {
-		const { username, password } = req.body;
-		clienBank.postClient({ username, password });
-		res.status(201).send('ok');
-	});
-	app.put('/client/:uid', (req: Request, res: Response) => {
-		const { uid } = req.params;
-		const { username, password } = req.body;
-		const client = {
-			username,
-			password,
-			update_at: new Date(),
-			uid,
-		};
-		clienBank.putClient(client);
-		res.status(200).send('Modified Successfully');
-	});
+    app.post('/client', (req: Request, res: Response) => {
+        const { username, password } = req.body;
+        clienBank.postClient({ username, password });
+        res.status(201).send('ok');
+    });
+    app.put('/client/:uid', (req: Request, res: Response) => {
+        const { uid } = req.params;
+        const { username, password } = req.body;
+        const client = {
+            username,
+            password,
+            update_at: new Date(),
+            uid,
+        };
+        clienBank.putClient(client);
+        res.status(200).send('Modified Successfully');
+    });
 
-	app.delete('/client/:uid', (req: Request, res: Response) => {
-		const { uid } = req.params;
-		clienBank.deleteClient(uid);
-		res.status(200).end();
-	});
+    app.delete('/client/:uid', (req: Request, res: Response) => {
+        const { uid } = req.params;
+        clienBank.deleteClient(uid);
+        res.status(200).end();
+    });
 
-	// rotas de contas
+    // rotas de contas
 
-	const account = new Account();
-	const transaction = new Transaction();
+    const account = new Account();
+    const transaction = new Transaction();
 
-	app.get('/account', async (req: Request, res: Response) => {
-		const result = await account.getAllAccounts();
-		res.status(200).send(result);
-	});
+    app.get('/account', async (req: Request, res: Response) => {
+        const result = await account.getAllAccounts();
+        res.status(200).send(result);
+    });
 
-	app.get('/account/:id', async (req: Request, res: Response) => {
-		const { id } = req.params;
+    app.get('/account/:id', async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
 
-		const transactions = (await transaction.getAllTransactions()).filter(
-			(transaction) => transaction.account_id === id
-		);
+            const transactions = await transaction.getAllTransactions();
 
-		account.updateAccountBalance(transactions, id);
+            const filteredTransactions = transactions.filter(
+                (transaction: ITransaction) => transaction.account_id === id
+            );
 
-		const result = await account.getAccountById(id);
+            const result = await account.updateAccountBalance(transactions, id);
 
-		res.status(200).send(result);
-	});
+            res.status(200).send(result);
+        } catch (error) {
+            console.error(error);
+        }
+    });
 
-	app.post('/account', async (req: Request, res: Response) => {
-		const { number_account, client_id } = req.body;
+    app.post('/account', async (req: Request, res: Response) => {
+        const { number_account, client_id } = req.body;
 
-		account.postAccount({ number_account, client_id });
+        account.postAccount({ number_account, client_id });
 
-		res.status(201).send('Conta criada com sucesso');
-	});
+        res.status(201).send('Conta criada com sucesso');
+    });
 
-	app.put('/account', async (req: Request, res: Response) => {
-		const { balance, uid } = req.body;
+    app.put('/account', async (req: Request, res: Response) => {
+        const { balance, uid } = req.body;
 
-		const updated_at = new Date();
+        const updated_at = new Date();
 
-		account.putAccountBalance({ balance, updated_at, uid });
+        account.putAccountBalance({ balance, updated_at, uid });
 
-		res.status(200).send('Saldo atualizado com sucesso');
-	});
+        res.status(200).send('Saldo atualizado com sucesso');
+    });
 
-	app.delete('/account/:id', async (req: Request, res: Response) => {
-		const { id } = req.params;
+    app.delete('/account/:id', async (req: Request, res: Response) => {
+        const { id } = req.params;
 
-		account.deleteAccount(id);
+        account.deleteAccount(id);
 
-		res.status(200).send('Conta deletada com sucesso');
-	});
+        res.status(200).send('Conta deletada com sucesso');
+    });
 
-	// rotas de transações
+    // rotas de transações
 
-	app.get('/transactions', async (req: Request, res: Response) => {
-		const result = await transaction.getAllTransactions();
+    app.get('/transactions', async (req: Request, res: Response) => {
+        const result = await transaction.getAllTransactions();
 
-		res.status(200).send(result);
-	});
+        res.status(200).send(result);
+    });
 
-	app.get('/transactions/:id', async (req: Request, res: Response) => {
-		const { id } = req.params;
+    app.get('/transactions/:id', async (req: Request, res: Response) => {
+        const { id } = req.params;
 
-		const result = await transaction.getTransactionsById(id);
+        const result = await transaction.getTransactionsById(id);
 
-		res.status(200).send(result);
-	});
+        res.status(200).send(result);
+    });
 
-	app.post('/transactions', async (req: Request, res: Response) => {
-		const { trans_value, trans_type, account_id } = req.body;
+    app.post('/transactions', async (req: Request, res: Response) => {
+        const { trans_value, trans_type, account_id } = req.body;
 
-		transaction.postTransactions({
-			trans_value,
-			trans_type,
-			account_id,
-		});
+        transaction.postTransactions({
+            trans_value,
+            trans_type,
+            account_id,
+        });
 
-		res.status(201).send('Transação efetuada com sucesso');
-	});
+        res.status(201).send('Transação efetuada com sucesso');
+    });
 
-	app.put('/transactions', async (req: Request, res: Response) => {
-		const { trans_value, trans_type, uid } = req.body;
+    app.put('/transactions', async (req: Request, res: Response) => {
+        const { trans_value, trans_type, uid } = req.body;
 
-		const updated_at = new Date();
+        const updated_at = new Date();
 
-		transaction.putTransactionsBalance({
-			trans_value,
-			trans_type,
-			updated_at,
-			uid,
-		});
+        transaction.putTransactionsBalance({
+            trans_value,
+            trans_type,
+            updated_at,
+            uid,
+        });
 
-		res.status(200).send('Transação atualizada com sucesso');
-	});
+        res.status(200).send('Transação atualizada com sucesso');
+    });
 
-	app.delete('/transactions/:id', async (req: Request, res: Response) => {
-		const { id } = req.params;
+    app.delete('/transactions/:id', async (req: Request, res: Response) => {
+        const { id } = req.params;
 
-		transaction.deleteTransaction(id);
+        transaction.deleteTransaction(id);
 
-		res.status(200).send('Transação excluída com sucesso');
-	});
+        res.status(200).send('Transação excluída com sucesso');
+    });
 };

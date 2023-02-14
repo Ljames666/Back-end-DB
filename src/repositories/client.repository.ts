@@ -1,10 +1,10 @@
 import IClient from '../interfaces/client.interface';
-import db from '../Database/dbConection';
+import { dbHelperConnection } from '../Database/db-helper-connection';
 
 export class Client {
     async getAllClients(): Promise<IClient[]> {
         // Aqui criamos o metodo para trazer de client todos os clientes inseridos na tabela
-        const response = await db.query('SELECT * FROM client');
+        const response = await dbHelperConnection.client.query('SELECT * FROM client');
         const result = response.rows.map((client: IClient) => client);
         console.log(result);
 
@@ -13,15 +13,18 @@ export class Client {
 
     async postClient({ username, password }: Partial<IClient>): Promise<void> {
         // aqui o metodo insere um client na tabela de clientes
-        await db.query('INSERT INTO client(username, password) VALUES ($1, $2)', [
-            username,
-            password,
-        ]);
+        await dbHelperConnection.client.query(
+            'INSERT INTO client(username, password) VALUES ($1, $2)',
+            [username, password]
+        );
     }
 
     async getClientById(id: string): Promise<IClient | undefined> {
         // busca o client pelo uid
-        const response = await db.query(`SELECT * FROM client WHERE uid=$1`, [id]);
+        const response = await dbHelperConnection.client.query(
+            `SELECT * FROM client WHERE uid=$1`,
+            [id]
+        );
         if (response.rowCount === 0) return undefined;
         const result = response.rows[0];
         console.log(result);
@@ -30,14 +33,16 @@ export class Client {
     }
 
     async putClient(client: Partial<IClient>): Promise<void> {
-        await db.query(
+        await dbHelperConnection.client.query(
             'UPDATE client SET username = $1, password = $2, updated_at = $3,  WHERE uid = $4',
             [client.username, client.password, client.updated_at, client.uid]
         );
     }
 
     async deleteClient(id: string): Promise<boolean> {
-        const result = await db.query('DELETE FROM client WHERE uid = $1', [id]);
+        const result = await dbHelperConnection.client.query('DELETE FROM client WHERE uid = $1', [
+            id,
+        ]);
         return result.rowCount !== 0;
     }
 }
